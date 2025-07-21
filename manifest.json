@@ -1,6 +1,6 @@
 {
 	"id": "auto-temp-cleaner",
-	"name": "Auto Temp cleaner",
+	"name": "Auto Temp Cleaner",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Deletes temporary files that have expired.",
