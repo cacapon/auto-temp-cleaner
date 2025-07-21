@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "auto-tmpfiles-remover",
+	"name": "Auto Tmpfiles Remover",
+	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Remove files in the temporary folder after the specified time has elapsed.",
+	"author": "cacapon",
+	"authorUrl": "https://github.com/cacapon/auto-tmp-file-remover",
+	"fundingUrl": "",
+	"isDesktopOnly": true
 }
