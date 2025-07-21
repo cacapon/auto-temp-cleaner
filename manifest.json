@@ -1,9 +1,9 @@
 {
-	"id": "auto-tmpfiles-remover",
-	"name": "Auto Tmpfiles Remover",
-	"version": "0.0.1",
+	"id": "auto-temp-cleaner",
+	"name": "Auto Temp cleaner",
+	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Remove files in the temporary folder after the specified time has elapsed.",
+	"description": "Deletes temporary files that have expired.",
 	"author": "cacapon",
 	"authorUrl": "https://github.com/cacapon/auto-tmp-file-remover",
 	"fundingUrl": "",

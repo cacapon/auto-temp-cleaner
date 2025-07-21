@@ -1,7 +1,7 @@
 {
-	"name": "auto-tmpfiles-remover",
-	"version": "0.0.1",
-	"description": "Remove files in the temporary folder after the specified time has elapsed.",
+	"name": "auto-temp-cleaner",
+	"version": "1.0.0",
+	"description": "Deletes temporary files that have expired.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
