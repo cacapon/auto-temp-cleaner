@@ -1,39 +1,57 @@
-import { App, normalizePath, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
+import {
+	App,
+	normalizePath,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+	TFile,
+	TFolder,
+} from "obsidian";
 
-interface AutoDeleteSettings {
+interface AutoTempCleanerSettings {
 	targetFolder: string;
 	ttlMinites: number;
 	checkInterval: number;
 }
 
-const DEFAULT_SETTINGS: AutoDeleteSettings = {
-	targetFolder: "_",
-	ttlMinites: 0,
-	checkInterval: 60,
-}
+const DEFAULT_SETTINGS: AutoTempCleanerSettings = {
+	targetFolder: "tmp",
+	ttlMinites: 1440,
+	checkInterval: 0,
+};
 
-export default class AutoTmpFilesRemover extends Plugin {
-	settings: AutoDeleteSettings;
+export default class AutoTempCleanerPlugin extends Plugin {
+	settings: AutoTempCleanerSettings;
 	intervalId: number | null = null;
 
 	async onload() {
 		await this.loadSettings();
 		this.startInterval();
-		this.addSettingTab(new AutoTmpFilesRemoverSettingTab(this.app, this));
+		this.addSettingTab(new AutoTempCleanerSettingTab(this.app, this));
 	}
 
-	onunload() {
-
-	}
+	onunload() {}
 
 	startInterval() {
+		if (this.settings.checkInterval === 0)
+		{
+			new Notice("Auto Temp Cleaner has been stopped.");
+		}
+		else
+		{
+			new Notice(`Run Auto Temp Cleaner every ${this.settings.checkInterval} minutes.`);
+		}
 		this.runCleanUp();
 		const intervalMs = toMilliSec(this.settings.checkInterval);
-		this.intervalId = window.setInterval(() => this.runCleanUp(), intervalMs);
+		this.intervalId = window.setInterval(
+			() => this.runCleanUp(),
+			intervalMs
+		);
 	}
 
 	async runCleanUp() {
-		if (this.settings.checkInterval === 0) return ;
+		if (this.settings.checkInterval === 0) return;
 		const folderPath = normalizePath(this.settings.targetFolder);
 		const folder = this.app.vault.getAbstractFileByPath(folderPath);
 		if (!(folder instanceof TFolder)) return;
@@ -56,7 +74,11 @@ export default class AutoTmpFilesRemover extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
@@ -64,10 +86,10 @@ export default class AutoTmpFilesRemover extends Plugin {
 	}
 }
 
-class AutoTmpFilesRemoverSettingTab extends PluginSettingTab {
-	plugin: AutoTmpFilesRemover;
+class AutoTempCleanerSettingTab extends PluginSettingTab {
+	plugin: AutoTempCleanerPlugin;
 
-	constructor(app: App, plugin: AutoTmpFilesRemover) {
+	constructor(app: App, plugin: AutoTempCleanerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -75,64 +97,73 @@ class AutoTmpFilesRemoverSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
-		containerEl.createEl("h2", { text: "Auto TmpFiles Remover"});
+		containerEl.createEl("h2", { text: "Auto Temp Cleaner" });
 
 		new Setting(containerEl)
-			.setName("対象フォルダ")
-			.setDesc("削除対象とするフォルダの相対パス")
+			.addButton((btn) =>
+				btn
+					.setButtonText("設定を初期化")
+					.setCta()
+					.onClick(async () => {
+						this.plugin.settings = { ...DEFAULT_SETTINGS };
+						await this.plugin.saveSettings();
+						this.display();
+						new Notice("設定を初期化しました");
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Target folder")
+			.setDesc("Enter the relative path of the folder to be deleted from the Vault.")
 			.addText((text) =>
 				text
 					.setPlaceholder("tmp")
 					.setValue(this.plugin.settings.targetFolder)
 					.onChange(async (value) => {
 						this.plugin.settings.targetFolder = value.trim();
-						await this.plugin.saveSettings();}
-					)
-			);
-		
-		new Setting(containerEl)
-			.setName("TTL (分)")
-			.setDesc("ファイル作成から何分後に削除するか")
-			.addText((text) =>
-				{
-					text.inputEl.type = "number";
-					text.inputEl.min = "1";
-					text.inputEl.max = "10080";
-					text
-						.setPlaceholder("1")
-						.setValue(String(this.plugin.settings.checkInterval))
-						.onChange(async (value) => {
-							const numVal = parseInt(value);
-							if (!isNaN(numVal) && numVal >= 1 && numVal <= 10080){ 
-								this.plugin.settings.ttlMinites = numVal;
-								await this.plugin.saveSettings();
-							}
-						});
-				}
+						await this.plugin.saveSettings();
+					})
 			);
 
 		new Setting(containerEl)
-			.setName("チェック間隔(分)")
-			.setDesc("何分毎に削除処理を実行するか (0-1440) ※0の場合は実行しません")
-			.addText((text) =>
-				{
-					text.inputEl.type = "number";
-					text.inputEl.min = "0";
-					text.inputEl.max = "1440";
-					text
-						.setPlaceholder("0")
-						.setValue(String(this.plugin.settings.checkInterval))
-						.onChange(async (value) => {
-							const numVal = parseInt(value);
-							if (!isNaN(numVal) && numVal >= 0 && numVal <= 1440){ 
-								this.plugin.settings.checkInterval = numVal;
-								await this.plugin.saveSettings();
-								this.plugin.onunload();
-								this.plugin.startInterval();
-							}
-						});
-				}
-			);
+			.setName("File expiration time (minutes)")
+			.setDesc("How many minutes after creation should files be deleted?")
+			.addText((text) => {
+				text.inputEl.type = "number";
+				text.inputEl.min = "1";
+				text.inputEl.max = "10080";
+				text.setPlaceholder("1")
+					.setValue(String(this.plugin.settings.ttlMinites))
+					.onChange(async (value) => {
+						const numVal = parseInt(value);
+						if (!isNaN(numVal) && numVal >= 1 && numVal <= 10080) {
+							this.plugin.settings.ttlMinites = numVal;
+							await this.plugin.saveSettings();
+						}
+					});
+			});
+
+		new Setting(containerEl)
+			.setName("Cleaner execution interval (minutes)")
+			.setDesc(
+				"How often should the Cleaner be run? (0-1440) *0 means stop"
+			)
+			.addText((text) => {
+				text.inputEl.type = "number";
+				text.inputEl.min = "0";
+				text.inputEl.max = "1440";
+				text.setPlaceholder("0")
+					.setValue(String(this.plugin.settings.checkInterval))
+					.onChange(async (value) => {
+						const numVal = parseInt(value);
+						if (!isNaN(numVal) && numVal >= 0 && numVal <= 1440) {
+							this.plugin.settings.checkInterval = numVal;
+							await this.plugin.saveSettings();
+							this.plugin.onunload();
+							this.plugin.startInterval();
+						}
+					});
+			});
 	}
 }
 
