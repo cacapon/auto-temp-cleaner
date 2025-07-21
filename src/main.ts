@@ -124,23 +124,6 @@ class AutoTempCleanerSettingTab extends PluginSettingTab {
 		);
 
 		new Setting(containerEl)
-			.setName("Confirm automatic deletion")
-			.setDesc("You understand and agree that this plugin will automatically delete files in the specified folder.")
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.confirmed)
-					.onChange(async (value) => {
-						this.plugin.settings.confirmed = value;
-						await this.plugin.saveSettings();
-						new Notice(
-							value
-								? "Automatic deletion is now enabled."
-								: "Automatic deletion is now disabled."
-						);
-					})
-			);
-
-		new Setting(containerEl)
 			.setName("Target folder")
 			.setDesc(
 				"Enter the relative path of the folder to be deleted from the Vault."
@@ -194,6 +177,23 @@ class AutoTempCleanerSettingTab extends PluginSettingTab {
 						}
 					});
 			});
+
+			new Setting(containerEl)
+			.setName("Confirm automatic deletion")
+			.setDesc("You understand and agree that this plugin will automatically delete files in the specified folder.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.confirmed)
+					.onChange(async (value) => {
+						this.plugin.settings.confirmed = value;
+						await this.plugin.saveSettings();
+						new Notice(
+							value
+								? "Automatic deletion is now enabled."
+								: "Automatic deletion is now disabled."
+						);
+					})
+			);
 	}
 }
 
