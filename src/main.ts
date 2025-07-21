@@ -13,12 +13,14 @@ interface AutoTempCleanerSettings {
 	targetFolder: string;
 	ttlMinites: number;
 	checkInterval: number;
+	confirmed: boolean;
 }
 
 const DEFAULT_SETTINGS: AutoTempCleanerSettings = {
 	targetFolder: "tmp",
 	ttlMinites: 1440,
 	checkInterval: 0,
+	confirmed: false,
 };
 
 export default class AutoTempCleanerPlugin extends Plugin {
@@ -31,16 +33,20 @@ export default class AutoTempCleanerPlugin extends Plugin {
 		this.addSettingTab(new AutoTempCleanerSettingTab(this.app, this));
 	}
 
-	onunload() {}
+	onunload() {
+		if (this.intervalId !== null) {
+			clearInterval(this.intervalId);
+			this.intervalId = null;
+		}
+	}
 
 	startInterval() {
-		if (this.settings.checkInterval === 0)
-		{
+		if (this.settings.checkInterval === 0) {
 			new Notice("Auto Temp Cleaner has been stopped.");
-		}
-		else
-		{
-			new Notice(`Run Auto Temp Cleaner every ${this.settings.checkInterval} minutes.`);
+		} else {
+			new Notice(
+				`Run Auto Temp Cleaner every ${this.settings.checkInterval} minutes.`
+			);
 		}
 		this.runCleanUp();
 		const intervalMs = toMilliSec(this.settings.checkInterval);
@@ -52,6 +58,12 @@ export default class AutoTempCleanerPlugin extends Plugin {
 
 	async runCleanUp() {
 		if (this.settings.checkInterval === 0) return;
+		if (!this.settings.confirmed) {
+			new Notice(
+				"This plugin automatically deletes files in the specified folder.\nPlease check the settings."
+			);
+			return;
+		}
 		const folderPath = normalizePath(this.settings.targetFolder);
 		const folder = this.app.vault.getAbstractFileByPath(folderPath);
 		if (!(folder instanceof TFolder)) return;
@@ -99,22 +111,40 @@ class AutoTempCleanerSettingTab extends PluginSettingTab {
 		containerEl.empty();
 		containerEl.createEl("h2", { text: "Auto Temp Cleaner" });
 
+		new Setting(containerEl).addButton((btn) =>
+			btn
+				.setButtonText("Initialize settings")
+				.setCta()
+				.onClick(async () => {
+					this.plugin.settings = { ...DEFAULT_SETTINGS };
+					await this.plugin.saveSettings();
+					this.display();
+					new Notice("Settings have been reset.");
+				})
+		);
+
 		new Setting(containerEl)
-			.addButton((btn) =>
-				btn
-					.setButtonText("設定を初期化")
-					.setCta()
-					.onClick(async () => {
-						this.plugin.settings = { ...DEFAULT_SETTINGS };
+			.setName("Confirm automatic deletion")
+			.setDesc("You understand and agree that this plugin will automatically delete files in the specified folder.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.confirmed)
+					.onChange(async (value) => {
+						this.plugin.settings.confirmed = value;
 						await this.plugin.saveSettings();
-						this.display();
-						new Notice("設定を初期化しました");
+						new Notice(
+							value
+								? "Automatic deletion is now enabled."
+								: "Automatic deletion is now disabled."
+						);
 					})
 			);
 
 		new Setting(containerEl)
 			.setName("Target folder")
-			.setDesc("Enter the relative path of the folder to be deleted from the Vault.")
+			.setDesc(
+				"Enter the relative path of the folder to be deleted from the Vault."
+			)
 			.addText((text) =>
 				text
 					.setPlaceholder("tmp")
