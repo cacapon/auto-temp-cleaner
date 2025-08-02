@@ -75,7 +75,7 @@ export default class AutoTempCleanerPlugin extends Plugin {
 			if (file instanceof TFile && file.extension === "md") {
 				const ctime = file.stat.ctime;
 				if (now - ctime > ttlMillis) {
-					await this.app.vault.delete(file);
+					await this.app.fileManager.trashFile(file);
 					delFiles.push(file.path);
 				}
 			}
