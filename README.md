@@ -20,3 +20,9 @@ This plugin was created for the purpose of deleting notes that have lost their f
 After that, the contents of the temporary folder will be automatically deleted at regular intervals.
 
 You can also initialize by pressing the "Initialize settings" button.
+
+## License and Attribution
+
+This project does not use code from any source other than the template. 
+
+We follow the template's license.
