@@ -109,7 +109,6 @@ class AutoTempCleanerSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
-		containerEl.createEl("h2", { text: "Auto Temp Cleaner" });
 
 		new Setting(containerEl).addButton((btn) =>
 			btn
