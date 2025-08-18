@@ -6,7 +6,7 @@ This plugin was created for the purpose of deleting notes that have lost their f
 
 ## How to use?
 
-1. Search from the list of community plugins and install them.
+1. Install via BART. (Once validation is complete, you will be able to install from the community plugin.)
 1. Please configure the following items.
 
 | Name                                 | Description                                                         |
