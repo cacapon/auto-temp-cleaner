@@ -1,4 +1,10 @@
+
 # Auto Temp Cleaner
+
+<p align="center">
+	<img width="120" height="120" alt="auto-temp-cleaner-icon" src="https://github.com/user-attachments/assets/0f9bebd3-592e-4b98-bb45-7ac3f4790c1d" />
+</p>
+
 
 Auto Temp Cleaner is an Obsidian plugin that automatically deletes files in the temporary folder that have exceeded their lifetime.
 
